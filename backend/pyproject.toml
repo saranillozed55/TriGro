@@ -1,0 +1,26 @@
+[project]
+name = "backend"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Zed Saranillo", email = "saranillozed55@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi[all]>=0.141.1",
+    "langchain>=1.4.0",
+    "langchain-openai>=1.6.2",
+    "psycopg2-binary>=2.9.13",
+    "python-dotenv>=1.2.3",
+    "sqlalchemy>=2.0.52",
+    "sqlmodel>=0.0.42",
+    "uvicorn>=0.52.4",
+]
+
+[project.scripts]
+backend = "backend:main"
+
+[build-system]
+requires = ["uv_build>=0.12.12,<0.13.0"]
+build-backend = "uv_build"

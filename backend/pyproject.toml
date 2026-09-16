@@ -8,6 +8,7 @@ authors = [
 ]
 requires-python = ">=3.14"
 dependencies = [
+    "alembic>=1.20.0",
     "fastapi[all]>=0.141.1",
     "langchain>=1.4.0",
     "langchain-openai>=1.6.2",

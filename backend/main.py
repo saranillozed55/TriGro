@@ -1,4 +1,6 @@
+
 import uvicorn
+from dotenv import load_dotenv
 from core.config import settings
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,38 +9,34 @@ from pydantic import BaseModel
 from sqlalchemy import Column, Integer, String, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session, sessionmaker
+from typing import Annotated
+
+from database import SessionLocal
+from models import User, ItemDB
 
 app = FastAPI(
-
     title = "TriGro"    
 )
+load_dotenv()
 
 #Database setup
-
-#"check_same_thread" to tell SQLite that a database connection can be sshared and used across different threads
-engine = create_engine("sqlite:///users.db", connect_args={"check_same_thread":False})
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind = engine)
-Base = declarative_base()
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 #--------------------------------------------------------------------------
 #Database Model - Essentially a row in a table
-class User(Base):
-    __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, index = True)
-    name = Column(String(100), nullable=False)
-    email = Column(String(100), nullable=False, unique=True)
-    role = Column(String(100), nullable=False)
-
-Base.metadata.create_all(engine)
-
-#Pydantic Models(Data class)
-class UserCreate(BaseModel):
+#Pydantic Models(Data class) - What I Accept - the information the client is allowed to provide
+class UserCreate(BaseModel): 
     name:str
     email:str
     role:str
 
-#protect any private information
+#protect any private information - What I return - information we want the client to see
 class UserResponse(BaseModel):
     id:int
     name:str
@@ -54,9 +52,12 @@ def get_db():
         yield db
     finally:
         db.close()
+#whenever I use SessionDep, Want a SQLAlchemy 'Session' that FastAPI gets by calling get_db()
+SessionDep = Annotated[Session, Depends(get_db)]
 
 get_db()
 
+#Get User
 @app.get("/users/{user_id}", response_model=UserResponse)
 def get_user(user_id:int, db:Session = Depends(get_db)):
 
@@ -67,10 +68,12 @@ def get_user(user_id:int, db:Session = Depends(get_db)):
 
     return user
 
+#Create User
 @app.post("/users/", response_model=UserResponse)
 def create_user(user: UserCreate, db:Session = Depends(get_db)): # depends if the database was returned to us, running and alive
 
     #check if user email already exists
+    #request for User in the table
     if db.query(User).filter(User.email == user.email).first():
         raise HTTPException(status_code=404, detail="User already exists!")
 
@@ -132,21 +135,49 @@ state = {"counter": 0}
 if __name__ == "__main__":
     uvicorn.run("main:app", host = "0.0.0.0", port = 8000, reload = True)
 
-class Item(BaseModel):
+class ItemCreate(BaseModel):
     name: str
+
+class ItemResponse(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        from_attributes = True
+
 
 #want to save myStock into a SQL so data is saved permanently
 #Want to convert pydantic object using item.dict()
 myStock = [] 
 
 #endpoints (/ or /user/1 or /api/things)
+
+
 @app.get("/")
 def root():
     return {"message": "Backend running"}
 
 #Region: Stock
+@app.post("/inventory/", response_model=ItemResponse)
+async def create_inventory_item(item: ItemCreate, db:SessionDep):
+    if db.query(ItemDB).filter(ItemDB.name == item.name).first():
+        raise HTTPException(
+            status_code = 400,
+            detail=f"{item.name} already in your inventory"
+        )
+
+    #'**' takes that dictionary and unpacks it into keyword arguments(Ex: name = "Apple")
+    new_item = ItemDB(**item.model_dump())
+    db.add(new_item)
+    db.commit()
+    db.refresh(new_item)
+
+    return new_item
+    
+
+#Tempoorary functions ------------------------------
 @app.post("/api/items")
-async def create_item(item: Item):
+async def create_item(item: ItemResponse):
     myStock.append(item)
     return {
         "message": f"{item.name} added to stock!"
@@ -165,11 +196,6 @@ async def clear_stock():
 
 #this @something is a decorator, takes the function below and does something with it
 #in this case the function below corresponds to the path /api/hello with an operator get
-
-#NEXT THING - LEARN HOW TO PASS ITEM FROM REACT INTO FASTAPI
-
-
-
 @app.get("/api/hello")
 async def read_hello():
     return{"message": "Hello from FastAPI"}

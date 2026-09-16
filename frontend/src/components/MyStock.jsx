@@ -3,7 +3,7 @@ import { useState } from "react";
 
 export default function MyStock() {
 
-    const API_URL = 'http://localhost:8000/api/items'
+    const API_URL = 'http://localhost:8000/inventory/'
 
     const[name, setName] = useState('');
     const[stock, setStock] = useState([])
@@ -33,7 +33,7 @@ export default function MyStock() {
         
 
             const data = await response.json();
-            console.log(data.message);
+            console.log(data.name, "was added to the DB");
             setName('')
         }
         catch (error) {
@@ -44,7 +44,9 @@ export default function MyStock() {
     const handleGetStock = async () =>
     {
         try {
-            const response = await fetch(API_URL);
+            const response = await fetch(API_URL, {
+                method: 'GET'
+            });
             const data = await response.json();
 
             data.forEach(item => {

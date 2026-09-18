@@ -1,12 +1,13 @@
+from langgraph_sdk.schema import Item
 
 import uvicorn
 from dotenv import load_dotenv
 from core.config import settings
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from pydantic import BaseModel
-from sqlalchemy import Column, Integer, String, create_engine
+from sqlalchemy import Column, Integer, String, create_engine, delete
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session, sessionmaker
 from typing import Annotated
@@ -123,7 +124,7 @@ def get_all_users(db:Session = Depends(get_db)):
 #Cross origin resource sharing(CORS)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
+    allow_origins="http://localhost:5173", #update this back to settings.ALLOWED_ORIGINS
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
@@ -137,10 +138,12 @@ if __name__ == "__main__":
 
 class ItemCreate(BaseModel):
     name: str
+    quantity: int
 
 class ItemResponse(BaseModel):
     id: int
     name: str
+    quantity: int
 
     class Config:
         from_attributes = True
@@ -163,7 +166,7 @@ async def create_inventory_item(item: ItemCreate, db:SessionDep):
     if db.query(ItemDB).filter(ItemDB.name == item.name).first():
         raise HTTPException(
             status_code = 400,
-            detail=f"{item.name} already in your inventory"
+            detail=f"{item.name} already in your inventory!"
         )
 
     #'**' takes that dictionary and unpacks it into keyword arguments(Ex: name = "Apple")
@@ -173,7 +176,38 @@ async def create_inventory_item(item: ItemCreate, db:SessionDep):
     db.refresh(new_item)
 
     return new_item
-    
+
+#not returning anything so no respone_model - unless we want to display what we got rid of in React later
+@app.delete("/inventory/")
+async def delete_inventory_item(item: ItemCreate, db:SessionDep):
+    db_user = db.query(ItemDB).filter(ItemDB.id == item.name).first()
+
+    #if the db_user does not exist
+    if not db_user:
+        raise HTTPException(
+            status_code = 400,
+            detail = f"{item.name} is not in your inventory!"
+        )
+    db.delete(db_user)
+    db.commit()
+    return {"message": "Item was deleted from inventory!"}
+
+@app.delete("/inventory/clear", status_code=status.HTTP_204_NO_CONTENT)
+async def clear_inventory_stock(db:SessionDep):
+    try:
+        db.execute(delete(ItemDB))
+
+        db.commit()
+
+        return
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to clear inventory: {str(e)}"
+        )
+
+
 
 #Tempoorary functions ------------------------------
 @app.post("/api/items")

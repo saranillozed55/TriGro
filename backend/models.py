@@ -19,4 +19,5 @@ class ItemDB(Base):
     __tablename__ = "items"
 
     id = Column(Integer, primary_key=True)
+    quantity = Column(Integer)
     name = Column(String)

@@ -1,29 +1,32 @@
-import { useState, useEffect } from 'react';
-import Sidebar from './components/Sidebar';
-import MyStock from './components/MyStock'
-
-import './App.css'
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Sidebar from "./components/Sidebar";
+import Navbar from "./components/Navbar";
+import Dashboard from "./pages/Dashboard";
+import Stock from "./pages/Stock";
+import Stores from "./pages/Stores";
+import Settings from "./pages/Settings";
 
 function App() {
-  const [message, setMessage] = useState('')
-
-  useEffect(() => {
-    fetch('http://localhost:8000/api/hello')
-    .then(res => res.json()) // raw response object and reads the body and parses it
-    .then(data => setMessage(data.message)) // now data is actual parsed JavaScript object
-    .catch(err => console.error(err))
-  }, [])
-
-
   return (
-    <>
-      <main className ="ml-64">
-        <div>{message || 'Loading...'}</div>
-        <MyStock/>
-      </main>
-      <Sidebar/>
-   </> 
-  )
+    <Router>
+      <div className="min-h-screen bg-gray-50">
+        <Sidebar />
+
+        <div className="ml-56">
+          <Navbar />
+
+          <main className="p-8 space-y-6">
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/stock" element={<Stock />} />
+              <Route path="/stores" element={<Stores />} />
+              <Route path="/settings" element={<Settings />} />
+            </Routes>
+          </main>
+        </div>
+      </div>
+    </Router>
+  );
 }
 
-export default App
+export default App;

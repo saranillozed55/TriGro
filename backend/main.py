@@ -1,4 +1,3 @@
-from langgraph_sdk.schema import Item
 
 import uvicorn
 from dotenv import load_dotenv
@@ -6,8 +5,8 @@ from core.config import settings
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
-from pydantic import BaseModel
-from sqlalchemy import Column, Integer, String, create_engine, delete
+from pydantic import BaseModel, ConfigDict
+from sqlalchemy import Column, Integer, String, create_engine, delete, select
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session, sessionmaker
 from typing import Annotated
@@ -124,7 +123,7 @@ def get_all_users(db:Session = Depends(get_db)):
 #Cross origin resource sharing(CORS)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins="http://localhost:5173", #update this back to settings.ALLOWED_ORIGINS
+    allow_origins=["http://localhost:5173"], #update this back to settings.ALLOWED_ORIGINS
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
@@ -145,8 +144,7 @@ class ItemResponse(BaseModel):
     name: str
     quantity: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 #want to save myStock into a SQL so data is saved permanently
@@ -179,8 +177,8 @@ async def create_inventory_item(item: ItemCreate, db:SessionDep):
 
 #not returning anything so no respone_model - unless we want to display what we got rid of in React later
 @app.delete("/inventory/")
-async def delete_inventory_item(item: ItemCreate, db:SessionDep):
-    db_user = db.query(ItemDB).filter(ItemDB.id == item.name).first()
+async def delete_inventory_item(item: int, db:SessionDep):
+    db_user = db.query(ItemDB).filter(ItemDB.id == item).first()
 
     #if the db_user does not exist
     if not db_user:
@@ -207,8 +205,18 @@ async def clear_inventory_stock(db:SessionDep):
             detail=f"Failed to clear inventory: {str(e)}"
         )
 
+@app.get("/inventory/", response_model=list[ItemResponse])
+async def get_all_inventory(db:SessionDep):
+    # query all items using modern SQLAclhemy 
+    statement = select(ItemDB)
+
+    db_items = db.scalars(statement).all()
+
+    #return raw database ORM Objects
+    return db_items
 
 
+#will get inventory from just that specific item later
 #Tempoorary functions ------------------------------
 @app.post("/api/items")
 async def create_item(item: ItemResponse):

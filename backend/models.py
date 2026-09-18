@@ -15,6 +15,7 @@ class User(Base):
     name = Column(String(100), nullable=False)
     email = Column(String(100), nullable=False, unique=True)
     role = Column(String(100), nullable=False)
+    
 class ItemDB(Base):
     __tablename__ = "items"
 

@@ -1,81 +1,46 @@
-import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { RxDashboard } from "react-icons/rx";
+import { BiSolidFridge } from "react-icons/bi";
+import { IoSettings } from "react-icons/io5";
+import { FaStore } from "react-icons/fa";
 
 export default function Sidebar() {
+  const location = useLocation();
 
-    const[count, setCount] = useState(0);
-    const[loading, setLoading] = useState(false)
+  const links = [
+    { label: "Dashboard", icon: RxDashboard, path: "/" },
+    { label: "Stock", icon: BiSolidFridge, path: "/stock" },
+    { label: "Stores", icon: FaStore, path: "/stores" },
+    { label: "Settings", icon: IoSettings, path: "/settings" },
+  ];
 
-    useEffect(() => {
-        fetch('http://localhost:8000/api/count')
-        .then((res) => res.json())
-        .then((data) => setCount(data.counter))
-        .catch((err) => console.error("Error:", err))
-    }, [])
+  return (
+    <aside className="fixed left-0 top-0 h-screen w-56 bg-gray-900 text-white flex flex-col">
+      <div className="px-6 py-5 border-b border-gray-800">
+        <h1 className="text-2xl font-bold text-emerald-400">TriGrow</h1>
+      </div>
 
-    const handleIncrement = async () => {
-        setLoading(true);
-        try{
-            const response = await fetch('http://localhost:8000/api/increment', {
-                method: 'POST'
-            });
-            const data = await response.json();
-            setCount(data.counter); //update ui
-        }
-        catch(error){
-            console.error(error);
-        }
-        finally{
-            setLoading(false);
-        }
-    };
+      <nav className="flex flex-col mt-4 gap-1 px-3">
+        {links.map((link) => {
+          const Icon = link.icon;
+          const isActive = location.pathname === link.path;
 
-    return(
-
-        <section className ="
-        fixed
-        flex
-        flex-col
-        left-0
-        h-screen
-        top-0
-        w-64
-        bg-gray-800
-        justify-start
-        items-center
-        text-center
-        ">
-            <h1 className = "text-3xl font-bold"><span className = "text-emerald-100">TriGrow</span></h1>
-            <div className ="
-            flex
-            flex-col
-            gap-4
-            mt-10
-            z-50
-             text-white">
-                <a href ="#" 
-                className ="
-                inline-block
-                hover:bg-blue-100 
-                hover:text-black 
-                transition-colors duration-300
-                py-2
-                px-4
-                rounded
-                ">My Inventory</a>
-                
-                <a href = "#"
-                className ="
-                inline-block
-                hover:bg-blue-100 
-                hover:text-black 
-                transition-colors duration-300
-                py-2
-                px-4
-                rounded
-                " >Stores</a>
-                <button onClick = {handleIncrement} disabled = {loading} className = "cursor-pointer">Incrment Value</button>
-                <p>Current Count: {count}</p>
-            </div>
-        </section>
-    );
+          return (
+            <Link
+              key={link.label}
+              to={link.path}
+              className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                isActive
+                  ? "bg-gray-800 text-white"
+                  : "text-gray-300 hover:bg-gray-800 hover:text-white"
+              }`}
+            >
+              <Icon className="text-lg" />
+              <span>{link.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
+    </aside>
+  );
 }

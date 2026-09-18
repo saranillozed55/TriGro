@@ -3,13 +3,14 @@ import { useState } from "react";
 
 export default function MyStock() {
 
-    const API_URL = 'http://localhost:8000/inventory/'
+    const API_URL_MAIN = 'http://localhost:8000/inventory/'
+    const API_URL_CLEAR = 'http://localhost:8000/inventory/clear'
 
     const[name, setName] = useState('');
+    const[quantity, setQuantity] = useState(0);
     const[stock, setStock] = useState([])
 
     const isInputEmpty = name.trim() === '';
-    //const isStockEmpty
 
     const handleSubmit = async (event) =>
     {
@@ -17,8 +18,8 @@ export default function MyStock() {
 
         try {
             // send post request to FastAPI
-            const response = await fetch(API_URL, {
-                method: 'POST',
+            const response = await fetch(API_URL_MAIN, {
+                method: 'POST', // create inventory item    
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -28,12 +29,12 @@ export default function MyStock() {
                 //header, FastAPI automatically catches the raw text string, interprets it as JSON, and maps it directly onto
                 //Python data types
 
-                body: JSON.stringify({name:name}),
+                body: JSON.stringify({name:name, quantity:1}),
             });
         
 
             const data = await response.json();
-            console.log(data.name, "was added to the DB");
+            console.log(data.name, "was added to the DB and");
             setName('')
         }
         catch (error) {
@@ -44,7 +45,7 @@ export default function MyStock() {
     const handleGetStock = async () =>
     {
         try {
-            const response = await fetch(API_URL, {
+            const response = await fetch(API_URL_MAIN, {
                 method: 'GET'
             });
             const data = await response.json();
@@ -63,7 +64,7 @@ export default function MyStock() {
     const handleClearStock = async () => {
         
         try {
-            const response = await fetch(API_URL, {
+            const response = await fetch(API_URL_CLEAR, {
                 method:"DELETE"
             });
             const data = await response.json();

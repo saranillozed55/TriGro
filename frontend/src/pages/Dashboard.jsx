@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import StatCard from "../components/StatCard";
-import MyInventory from "../components/MyInventory";
+import MyInventoryDash from "../components/MyInventoryDash";
+import AddItemMenu from "../components/AddItemMenu";
 
 export default function Dashboard() {
   const [message, setMessage] = useState("");
@@ -11,6 +12,8 @@ export default function Dashboard() {
       .then((data) => setMessage(data.message))
       .catch((err) => console.error(err));
   }, []);
+
+
 
   return (
     <>
@@ -27,8 +30,13 @@ export default function Dashboard() {
         <StatCard label="Low Stock" value="3" to="/stock" />
         <StatCard label="Top Stores" value="5" to="/stores" />
       </div>
-
-      <MyInventory />
+      <div className="flex flex-col gap-4">
+        <MyInventoryDash />
+        <div className = "bg-gray-300 w-fit rounded p-2">
+          <button className = "cursor-pointer">+ Add Item</button>
+        </div>
+        <AddItemMenu/>
+      </div>
     </>
   );
 }

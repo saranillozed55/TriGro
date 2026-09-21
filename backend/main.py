@@ -184,12 +184,13 @@ async def delete_inventory_item(item: int, db:SessionDep):
     if not db_user:
         raise HTTPException(
             status_code = 400,
-            detail = f"{item.name} is not in your inventory!"
+            detail = f"{item} is not in your inventory!"
         )
     db.delete(db_user)
     db.commit()
     return {"message": "Item was deleted from inventory!"}
 
+#clear entire inventory
 @app.delete("/inventory/clear", status_code=status.HTTP_204_NO_CONTENT)
 async def clear_inventory_stock(db:SessionDep):
     try:

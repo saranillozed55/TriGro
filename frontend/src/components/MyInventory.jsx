@@ -1,26 +1,115 @@
+import { useState } from "react";
 
 
 export default function MyInventory() {
-    const items = [
-    { name: "Eggs", emoji: "🥚", qty: 12 },
-    { name: "Milk", emoji: "🥛", qty: 2 },
-    { name: "Apples", emoji: "🍎", qty: 8 },
-    ];
-  return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-      <h2 className="text-lg font-semibold mb-4">My Inventory</h2>
-      <div className="space-y-3">
-        {items.map((item) => (
-          <div key={item.name} className="flex items-end">
-            <span className="flex items-center gap-2">
-              <span>{item.emoji}</span>
-              <span>{item.name}</span>
-            </span>
-            <span className="flex-1 border-b border-dotted border-gray-300 mx-2 mb-1"></span>
-            <span className="font-medium">{item.qty}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+
+    // const API_URL_MAIN = 'http://localhost:8000/inventory/'
+    // const API_URL_CLEAR = 'http://localhost:8000/inventory/clear'
+
+    // const[name, setName] = useState('');
+    // const[quantity, setQuantity] = useState(0);
+    // const[stock, setStock] = useState([])
+
+    // const isInputEmpty = name.trim() === '';
+
+    // const handleSubmit = async (event) =>
+    // {
+    //     event.preventDefault();
+
+    //     try {
+    //         // send post request to FastAPI
+    //         const response = await fetch(API_URL_MAIN, {
+    //             method: 'POST', // create inventory item    
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+                
+    //             //doing this because HTTP networks cannot transmit raw JavaScript Memory Objects
+    //             //FastAPI relies on Pydantic Models for datra validation. when we pass an application/json
+    //             //header, FastAPI automatically catches the raw text string, interprets it as JSON, and maps it directly onto
+    //             //Python data types
+
+    //             body: JSON.stringify({name:name, quantity:1}),
+    //         });
+        
+
+    //         const data = await response.json();
+    //         console.log(data.name, "was added to the DB and");
+    //         setName('')
+    //     }
+    //     catch (error) {
+    //         console.error('Error sending item:', error);
+    //     }
+    // };
+
+    // const handleGetStock = async () =>
+    // {
+    //     try {
+    //         const response = await fetch(API_URL_MAIN, {
+    //             method: 'GET'
+    //         });
+    //         const data = await response.json();
+
+    //         data.forEach(item => {
+    //             console.log(item.name);
+    //         })
+    //         setStock(data);
+    //     }
+    //     catch(err) {
+    //         console.log("Error getting stock:", err);
+    //     }
+    // }
+
+
+    // const handleClearStock = async () => {
+        
+    //     try {
+    //         const response = await fetch(API_URL_CLEAR, {
+    //             method:"DELETE"
+    //         });
+    //         const data = await response.json();
+
+    //         data.forEach(item => {
+    //             console.log(item.name);
+    //         })
+    //         setStock(data);
+    //     }
+    //     catch(err) {
+    //         console.log("Error getting stock:", err);
+    //     }
+    // }
+
+    
+
+    // later on because it says we printing an empty string, we just want to not print empty string if we have an empty stock
+    return (
+
+        <div>
+            
+        </div>
+
+        // <form onSubmit={handleSubmit}>
+        //     <div className = "">
+        //         <label>Enter Item: </label>
+        //         <input id="item-name" type="text" value={name} placeholder="Eggs..." onChange={(e) => setName(e.target.value)}
+        //         className="bg-gray-100 px-4 py-2 rounded"></input>
+        //         <button type="submit" disabled={isInputEmpty} className="
+        //         cursor-pointer bg-emerald-200 px-4 py-2 rounded">Submit</button>
+                                
+        //         <section className ="flex flex-col items-start gap-2">
+        //             <button onClick={handleGetStock} className="
+        //             cursor-pointer bg-blue-500 px-4 py-2 rounded"><strong>Get Stock </strong></button>
+        //             <button onClick={handleClearStock} className="cursor-pointer
+        //              bg-blue-500 px-4 py-2 rounded"><strong>Clear Stock</strong></button>
+        //         </section>
+
+        //         <ul>
+        //             {stock.map((item, index) => (
+        //                 <li key = {index}>{item.name}
+        //                 </li>
+        //             ))}
+        //         </ul>
+        //     </div>
+        // </form>
+    );
 }

@@ -11,7 +11,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session, sessionmaker
 from typing import Annotated
 
-from database import SessionLocal
+from database import SessionLocal, Base, engine
 from models import User, ItemDB
 
 app = FastAPI(
@@ -19,16 +19,9 @@ app = FastAPI(
 )
 load_dotenv()
 
-#Database setup
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
 #--------------------------------------------------------------------------
 #Database Model - Essentially a row in a table
+Base.metadata.create_all(bind=engine)
 
 #Pydantic Models(Data class) - What I Accept - the information the client is allowed to provide
 class UserCreate(BaseModel): 
@@ -52,6 +45,7 @@ def get_db():
         yield db
     finally:
         db.close()
+
 #whenever I use SessionDep, Want a SQLAlchemy 'Session' that FastAPI gets by calling get_db()
 SessionDep = Annotated[Session, Depends(get_db)]
 
@@ -161,11 +155,12 @@ def root():
 #Region: Stock
 @app.post("/inventory/", response_model=ItemResponse)
 async def create_inventory_item(item: ItemCreate, db:SessionDep):
-    if db.query(ItemDB).filter(ItemDB.name == item.name).first():
-        raise HTTPException(
-            status_code = 400,
-            detail=f"{item.name} already in your inventory!"
-        )
+    existing = db.query(ItemDB).filter(ItemDB.name == item.name).first()
+    if existing:
+        setattr(existing, "quantity", existing.quantity + item.quantity)
+        db.commit()
+        db.refresh(existing)
+        return existing
 
     #'**' takes that dictionary and unpacks it into keyword arguments(Ex: name = "Apple")
     new_item = ItemDB(**item.model_dump())

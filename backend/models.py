@@ -19,6 +19,6 @@ class User(Base):
 class ItemDB(Base):
     __tablename__ = "items"
 
-    id = Column(Integer, primary_key=True)
-    quantity = Column(Integer)
-    name = Column(String)
+    id = Column(Integer, primary_key=True, index = True)
+    quantity = Column(Integer, nullable=False)
+    name = Column(String, nullable = False)

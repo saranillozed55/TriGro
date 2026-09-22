@@ -13,8 +13,6 @@ export default function Dashboard() {
       .catch((err) => console.error(err));
   }, []);
 
-
-
   return (
     <>
       <div>
@@ -32,10 +30,6 @@ export default function Dashboard() {
       </div>
       <div className="flex flex-col gap-4">
         <MyInventoryDash />
-        <div className = "bg-gray-300 w-fit rounded p-2">
-          <button className = "cursor-pointer">+ Add Item</button>
-        </div>
-        <AddItemMenu/>
       </div>
     </>
   );

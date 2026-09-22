@@ -8,9 +8,10 @@ export default function MyInvetoryDash() {
 
     const{inventory, handleGetAllInventory} = useInventory();
 
-  //TODO: Implement remove item
+  //TODO: Implement remove item frontend
   return (
     <>
+      /*if showItemMenu is True then show AddItemMenu, otherwise render nothing*/
       {showItemMenu && (<AddItemMenu onItemAdded={handleGetAllInventory} onClosePerformed={() => setShowItemMenu(false)}/>)}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
         <h2 className="text-lg font-semibold mb-4">My Inventory</h2>

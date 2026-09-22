@@ -2,6 +2,7 @@ import { useState, useEffect, createContext, useContext} from "react";
 
 const InventoryContext = createContext(null);
 
+//Inventory data now lives outside of something that gets destroyed then re-rendered
 export function InventoryProvider({children}) {
     
     const[inventory, setInventory] = useState([]);

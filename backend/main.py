@@ -140,6 +140,8 @@ class ItemResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+class QuantityUpdate(BaseModel):
+    quantity: int
 
 #want to save myStock into a SQL so data is saved permanently
 #Want to convert pydantic object using item.dict()
@@ -173,17 +175,33 @@ async def create_inventory_item(item: ItemCreate, db:SessionDep):
 #not returning anything so no respone_model - unless we want to display what we got rid of in React later
 @app.delete("/inventory/")
 async def delete_inventory_item(item: int, db:SessionDep):
-    db_user = db.query(ItemDB).filter(ItemDB.id == item).first()
+    itemExists = db.query(ItemDB).filter(ItemDB.id == item).first()
 
     #if the db_user does not exist
-    if not db_user:
+    if not itemExists:
         raise HTTPException(
             status_code = 400,
             detail = f"{item} is not in your inventory!"
         )
-    db.delete(db_user)
+    db.delete(itemExists)
     db.commit()
     return {"message": "Item was deleted from inventory!"}
+
+#partially update on a resource, PATCH requests only updates the specific fields provided by client
+@app.patch("/inventory/{item_id}remove")
+async def remove_quantity(item_id: int, update: QuantityUpdate, db:SessionDep):
+    itemExists = db.query(ItemDB).filter(ItemDB.id == item_id).first()
+
+    if not itemExists:
+        raise HTTPException(status_code = 400, detail = f"{item_id} does not exist!")
+    if update.quantity > itemExists.quantity:  # type: ignore[operator]
+        raise HTTPException(status_code= 400 , detail = f"{item_id} cannot your max number of items!")
+
+    itemExists -= update.quantity
+    db.commit()
+    db.refresh(itemExists)
+    return itemExists
+
 
 #clear entire inventory
 @app.delete("/inventory/clear", status_code=status.HTTP_204_NO_CONTENT)

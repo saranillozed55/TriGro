@@ -8,7 +8,7 @@ export default function MyInvetoryDash() {
 
     const{inventory, handleGetAllInventory} = useInventory();
 
-  //TODO: Must implement the adding item then MyInventory will display that in here by re-rendering
+  //TODO: Implement remove item
   return (
     <>
       {showItemMenu && (<AddItemMenu onItemAdded={handleGetAllInventory} onClosePerformed={() => setShowItemMenu(false)}/>)}
@@ -26,8 +26,13 @@ export default function MyInvetoryDash() {
           ))}
         </div>
       </div>
-      <div className = "bg-gray-300 w-fit rounded p-2">
-          <button className = "cursor-pointer" onClick={() => setShowItemMenu(true)}>+ Add Item</button>
+      <div className ="flex flex-horizontal gap-4 ">
+        <div className = "bg-gray-300 w-fit rounded p-2">
+            <button className = "cursor-pointer" onClick={() => setShowItemMenu(true)}>+ Add Item</button>
+        </div>
+        <div className ="bg-gray-300 w-fit rounded p-2">
+            <button className = "cursor-pointer">+ Remove Item</button> 
+        </div>
       </div>
     </>
   );

@@ -19,7 +19,6 @@ export default function Dashboard() {
         <p className="text-gray-500 mt-1">
           Here's what's happening with your inventory.
         </p>
-        {message && <p className="text-sm text-emerald-600 mt-1">{message}</p>}
       </div>
 
       <div className="flex gap-4">

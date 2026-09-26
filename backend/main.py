@@ -1,5 +1,8 @@
+from http.client import responses
+import asyncio
 
 import uvicorn
+import requests
 from dotenv import load_dotenv
 from core.config import settings
 from fastapi import Depends, FastAPI, HTTPException, status
@@ -13,11 +16,28 @@ from typing import Annotated
 
 from database import SessionLocal, Base, engine
 from models import User, ItemDB
+from google import genai
+
 
 app = FastAPI(
     title = "TriGro"    
 )
 load_dotenv()
+
+client = genai.Client()
+
+stream = client.interactions.create(
+    model = "gemini-3.8-flash",
+    input= "Explain how AI works in a few words",
+    stream=True
+)
+
+for event in stream:
+    # Check if this event contains a piece of the generated text
+    if event.event_type == "step.delta":
+        if event.delta.type == "text":
+            # Print the text chunk immediately without a newline, flushing the buffer
+            print(event.delta.text, end="", flush=True)
 
 #--------------------------------------------------------------------------
 #Database Model - Essentially a row in a table
@@ -51,67 +71,7 @@ SessionDep = Annotated[Session, Depends(get_db)]
 
 get_db()
 
-#Get User
-@app.get("/users/{user_id}", response_model=UserResponse)
-def get_user(user_id:int, db:Session = Depends(get_db)):
-
-    #find the user 
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found!")
-
-    return user
-
-#Create User
-@app.post("/users/", response_model=UserResponse)
-def create_user(user: UserCreate, db:Session = Depends(get_db)): # depends if the database was returned to us, running and alive
-
-    #check if user email already exists
-    #request for User in the table
-    if db.query(User).filter(User.email == user.email).first():
-        raise HTTPException(status_code=404, detail="User already exists!")
-
-    #create a new user
-    new_user = User(**user.model_dump())
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    return new_user
-    
-
-#Update User
-@app.put("/user/{user_id}", response_model=UserResponse)
-def update_user(user_id:int, user:UserCreate, db:Session = Depends(get_db)):
-    db_user = db.query(User).filter(User.id == user_id).first()
-
-    if not db_user: #error if they do not exist
-        raise HTTPException(status_code=404, detail="User does not exist")
-
-    for field, value in user.model_dump().items():
-        setattr(db_user, field, value)
-    
-    db.commit()
-    db.refresh(db_user)
-    return db_user
-
-#Delete User
-@app.delete("/users/{user_id}")
-def delete_user(user_id:int, db:Session=Depends(get_db)):
-    db_user = db.query(User).filter(User.id == user_id).first()
-    
-    if not db_user: #error if they do not exist
-        raise HTTPException(status_code=404, detail="User does not exist")
-    
-    db.delete(db_user)
-    db.commit()
-    return {"message": "User deleted!"}
-
-#Get All Users
-@app.get("/users/", response_model=list[UserResponse])
-def get_all_users(db:Session = Depends(get_db)):
-    return db.query(User).all()
-
-#-----------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------
 
 #allow react dev server to talk to API
 #Cross origin resource sharing(CORS)
@@ -123,7 +83,6 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-state = {"counter": 0}
 
 #only execute if we directly execute this python file
 if __name__ == "__main__":
@@ -143,13 +102,7 @@ class ItemResponse(BaseModel):
 class QuantityUpdate(BaseModel):
     quantity: int
 
-#want to save myStock into a SQL so data is saved permanently
-#Want to convert pydantic object using item.dict()
-myStock = [] 
-
 #endpoints (/ or /user/1 or /api/things)
-
-
 @app.get("/")
 def root():
     return {"message": "Backend running"}
@@ -174,8 +127,8 @@ async def create_inventory_item(item: ItemCreate, db:SessionDep):
 
 #not returning anything so no respone_model - unless we want to display what we got rid of in React later
 @app.delete("/inventory/")
-async def delete_inventory_item(item: int, db:SessionDep):
-    itemExists = db.query(ItemDB).filter(ItemDB.id == item).first()
+async def delete_inventory_item(item: ItemCreate, db:SessionDep):
+    itemExists = db.query(ItemDB).filter(ItemDB.name == item.name).first()
 
     #if the db_user does not exist
     if not itemExists:
@@ -229,25 +182,6 @@ async def get_all_inventory(db:SessionDep):
     #return raw database ORM Objects
     return db_items
 
-
-#will get inventory from just that specific item later
-#Tempoorary functions ------------------------------
-@app.post("/api/items")
-async def create_item(item: ItemResponse):
-    myStock.append(item)
-    return {
-        "message": f"{item.name} added to stock!"
-    }
-
-@app.get("/api/items")
-async def get_stock():
-    return myStock
-
-@app.delete("/api/items")
-async def clear_stock():
-    myStock.clear()
-    return myStock
-
 #EndRegion
 
 #this @something is a decorator, takes the function below and does something with it
@@ -260,19 +194,6 @@ async def read_hello():
 @app.get("/favicon.ico", include_in_schema=False)
 async def favicon():
     return Response(status_code=204)  # No Content
-
-@app.put("/api/items/{item_id}")
-async def update_item(item_id: int):
-    return {"id": item_id, "message": "Updated"}
-
-@app.get("/api/count")
-async def get_state():
-    return state
-
-@app.post("/api/increment")
-async def increment():
-    state["counter"] += 1
-    return state
 
 #http requests (CRUD)
 #Get - retrieve data

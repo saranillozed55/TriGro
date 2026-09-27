@@ -3,6 +3,7 @@ import { RxDashboard } from "react-icons/rx";
 import { BiSolidFridge } from "react-icons/bi";
 import { IoSettings } from "react-icons/io5";
 import { FaStore } from "react-icons/fa";
+import { LuScroll } from "react-icons/lu";
 
 export default function Sidebar() {
   const location = useLocation();
@@ -11,6 +12,7 @@ export default function Sidebar() {
     { label: "Dashboard", icon: RxDashboard, path: "/" },
     { label: "Stock", icon: BiSolidFridge, path: "/stock" },
     { label: "Stores", icon: FaStore, path: "/stores" },
+    {label : "Recipes", icon: LuScroll, path: "/recipes"},
     { label: "Settings", icon: IoSettings, path: "/settings" },
   ];
 

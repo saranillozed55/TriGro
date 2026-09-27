@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import StatCard from "../components/StatCard";
 import MyInventoryDash from "../components/MyInventoryDash";
-import RemoveItemMenu from "../components/RemoveItemMenu";
 
 export default function Dashboard() {
   const [message, setMessage] = useState("");

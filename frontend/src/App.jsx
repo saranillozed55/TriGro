@@ -7,6 +7,7 @@ import Stores from "./pages/Stores";
 import Settings from "./pages/Settings";
 
 import {InventoryProvider} from "./components/InventoryContext"
+import Recipes from "./pages/Recipes";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/stock" element={<Stock />} />
                 <Route path="/stores" element={<Stores />} />
+                <Route path ="/recipes" element={<Recipes/>} />
                 <Route path="/settings" element={<Settings />} />
               </Routes>
             </main>

@@ -17,7 +17,7 @@ export default function MyInvetoryDash() {
       {showRemoveItemMenu && (<RemoveItemMenu onItemRemoved={handleGetAllInventory} onClosePerformed={() => setShowRemoveItemMenu(false)}/>)}
       {showItemMenu && (<AddItemMenu onItemAdded={handleGetAllInventory} onClosePerformed={() => setShowItemMenu(false)}/>)}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-        <h2 className="text-lg font-semibold mb-4">My Inventory</h2>
+        <h2 className="text-lg font-semibold mb-4">My <span className="text-emerald-400">Inventory</span></h2>
         <div className="space-y-3">
           {inventory.map((item) => (
             <div key={item.id} className="flex items-end">
@@ -35,7 +35,7 @@ export default function MyInvetoryDash() {
             <button className = "cursor-pointer" onClick={() => setShowItemMenu(true)}>+ Add Item</button>
         </div>
         <div className ="bg-gray-300 w-fit rounded p-2">
-            <button className = "cursor-pointer">+ Remove Item</button> 
+            <button className = "cursor-pointer" onClick={() => setShowRemoveItemMenu(true)}>+ Remove Item</button> 
         </div>
       </div>
     </>

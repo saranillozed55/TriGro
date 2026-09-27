@@ -30,14 +30,14 @@ export default function MyInvetoryDash() {
           ))}
         </div>
       </div>
-      <div className ="flex flex-horizontal gap-4 ">
+      {/* <div className ="flex flex-horizontal gap-4 ">
         <div className = "bg-gray-300 w-fit rounded p-2">
             <button className = "cursor-pointer" onClick={() => setShowItemMenu(true)}>+ Add Item</button>
         </div>
         <div className ="bg-gray-300 w-fit rounded p-2">
             <button className = "cursor-pointer" onClick={() => setShowRemoveItemMenu(true)}>+ Remove Item</button> 
         </div>
-      </div>
+      </div> */}
     </>
   );
 }

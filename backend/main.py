@@ -170,6 +170,7 @@ async def remove_quantity(item_id: int, update: QuantityUpdate, db:SessionDep):
     if update.quantity > itemExists.quantity:  # type: ignore[operator]
         raise HTTPException(status_code= 400 , detail = f"{item_id} cannot your max number of items!")
 
+    #bug
     itemExists -= update.quantity
     db.commit()
     db.refresh(itemExists)

@@ -6,6 +6,12 @@ const InventoryContext = createContext(null);
 export function InventoryProvider({children}) {
     
     const[inventory, setInventory] = useState([]);
+    const[randomItem, setRandomItem] = useState(null);
+
+    useEffect(() => {
+        handleGetAllInventory();
+    }, []);
+    
 
     const handleGetAllInventory = async () => {
       try {
@@ -14,6 +20,11 @@ export function InventoryProvider({children}) {
         const data = await response.json();
         
         setInventory(data);
+
+        if(data.length > 0) {
+            const randomIndex = Math.floor(Math.random() * data.length);
+            setRandomItem(data[randomIndex]);
+        }
       }
       catch(error) {
         console.error("Error fetching inventory:", error)
@@ -25,7 +36,7 @@ export function InventoryProvider({children}) {
     }, [])
     
     return(
-        <InventoryContext.Provider value = {{inventory, handleGetAllInventory}}>
+        <InventoryContext.Provider value = {{inventory, randomItem, handleGetAllInventory}}>
             {children}
         </InventoryContext.Provider>
     );

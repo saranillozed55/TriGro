@@ -1,11 +1,12 @@
-from http.client import responses
-import asyncio
 
+import os
 import uvicorn
 import requests
+
+from http.client import responses
 from dotenv import load_dotenv
 from core.config import settings
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException, status, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from pydantic import BaseModel, ConfigDict
@@ -16,7 +17,6 @@ from typing import Annotated
 
 from database import SessionLocal, Base, engine
 from models import User, ItemDB
-from google import genai
 
 
 app = FastAPI(
@@ -24,20 +24,40 @@ app = FastAPI(
 )
 load_dotenv()
 
-client = genai.Client()
 
-stream = client.interactions.create(
-    model = "gemini-3.8-flash",
-    input= "Explain how AI works in a few words",
-    stream=True
-)
+router = APIRouter(prefix="/recipes", tags=["Recipes"])
 
-for event in stream:
-    # Check if this event contains a piece of the generated text
-    if event.event_type == "step.delta":
-        if event.delta.type == "text":
-            # Print the text chunk immediately without a newline, flushing the buffer
-            print(event.delta.text, end="", flush=True)
+RECIPE_API_KEY=os.getenv("RECIPE_API_KEY")
+
+#Get recipes by doing ingredient1, ingredient2
+@router.get("/")
+def get_recipes(ingredients:str):
+    if not RECIPE_API_KEY:
+        raise HTTPException(
+            status_code=500,
+            detail="Recipe API Key Missing"
+        )
+    url = "https://recipeapi.io/api/v1/recipes"
+
+    headers = {
+        "Authorization": f"Bearer {RECIPE_API_KEY}" 
+    }
+
+    params = {
+        "ingredients": ingredients,
+        "per_page": 10
+    }
+
+    response = requests.get(url, headers=headers, params=params)
+
+    if response.status_code != 200:
+        raise HTTPException(
+            status_code=response.status_code,
+            detail="Failed to fetch recipes"
+        )
+    return response.json()
+
+app.include_router(router)
 
 #--------------------------------------------------------------------------
 #Database Model - Essentially a row in a table

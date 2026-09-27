@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = ""
     ALLOWED_ORIGINS: str = ""
     GEMINI_API_KEY: str = ""
+    RECIPE_API_KEY: str = ""
 
     @field_validator("ALLOWED_ORIGINS")
     def parse_allowed_origins(cls, v: str) -> List[str]:

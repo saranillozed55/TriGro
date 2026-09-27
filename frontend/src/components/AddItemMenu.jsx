@@ -60,9 +60,9 @@ export default function AddItemMenu({onItemAdded, onClosePerformed}) {
 
                     <div className = "flex flex-col gap-3">
                         <h1 className = "text-3xl"> Quantity</h1>
-                        <input className ="w-64 h-10 
+                        <input className ="w-64 h-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none
                         bg-gray-100 rounded p-3 text-2xl" type="number" placeholder="5..." 
-                        onChange={handleItemQuantity} inputMode="numeric"
+                        onChange={handleItemQuantity} value="1" max = "100" inputMode="numeric"
                         ></input>
                     </div>
                 </div>

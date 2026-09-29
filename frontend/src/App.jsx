@@ -3,7 +3,6 @@ import Sidebar from "./components/Sidebar";
 import Navbar from "./components/Navbar";
 import Dashboard from "./pages/Dashboard";
 import Stock from "./pages/Stock";
-import Stores from "./pages/Stores";
 import Settings from "./pages/Settings";
 
 import {InventoryProvider} from "./components/InventoryContext"
@@ -23,7 +22,6 @@ function App() {
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/stock" element={<Stock />} />
-                <Route path="/stores" element={<Stores />} />
                 <Route path ="/recipes" element={<Recipes/>} />
                 <Route path="/settings" element={<Settings />} />
               </Routes>

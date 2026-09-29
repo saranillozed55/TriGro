@@ -6,6 +6,7 @@ export default function AddItemMenu({onItemAdded, onClosePerformed}) {
 
     const[itemName, setItemName] = useState('');
     const[itemQuantity, setItemQuantity] = useState(1);
+    const[itemExpirationDate, setItemExpirationDate] = useState('');
     const isInputEmpty = itemName.trim() === '' || itemQuantity === 0;
 
     const handleItemSubmit = async (event) => {
@@ -52,7 +53,7 @@ export default function AddItemMenu({onItemAdded, onClosePerformed}) {
                     <div className = "flex flex-col gap-3">
                         <h1 className ="text-3xl">Item Name:</h1>
                         <input className="w-64 h-10 
-                        bg-gray-100 rounded p-3
+                        bg-gray-50 rounded p-3
                         text-2xl" type="text" placeholder="Caviar..."
                         onChange ={(e) => setItemName(e.target.value)}
                         ></input>
@@ -61,8 +62,14 @@ export default function AddItemMenu({onItemAdded, onClosePerformed}) {
                     <div className = "flex flex-col gap-3">
                         <h1 className = "text-3xl"> Quantity</h1>
                         <input className ="w-64 h-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none
-                        bg-gray-100 rounded p-3 text-2xl" type="number" placeholder="5..." 
+                        bg-gray-50 rounded p-3 text-2xl" type="number" placeholder="5..." 
                         onChange={handleItemQuantity} value={itemQuantity} max = "100" inputMode="numeric"
+                        ></input>
+                    </div>
+
+                    <div className="flex flex-col gap-3">
+                        <h1 className="text-3xl">Expiration Date <em className="text-xl">(optional)</em></h1>
+                        <input className ="w-64 h-10 text-2xl rounded bg-gray-50" type="date" onChange={(e) => setItemExpirationDate(e.target.value)}
                         ></input>
                     </div>
                 </div>

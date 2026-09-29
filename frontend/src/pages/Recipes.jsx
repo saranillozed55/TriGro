@@ -1,16 +1,9 @@
-import { useState } from "react"
-import RecipeSearchCard from "../components/RecipeSearchCard"
+import RecipeSearchCard from "../components/RecipeSearchCard";
+import {recipeCards} from "../data/RecipeCard";
 
 
 export default function Recipes() {
-
-    const[search, setSearch] = useState('')
     
-    const recipeCards = [
-        {label: "Create Your Own!", icon: null},
-        {label: "Search for Recipes!", icon: null},
-        {label: "Search with your Ingredients!", icon: null}
-    ]
 
     return(
         <>
@@ -20,7 +13,7 @@ export default function Recipes() {
                 </div>
                 <div className ="grid grid-cols-2 gap-6">
                     {recipeCards.map((card) => (
-                        <RecipeSearchCard key={card.label} title={card.label}/>
+                        <RecipeSearchCard key={card.label} title={card.label} description={card.description}/>
                     ))}
                 </div>
             </div>

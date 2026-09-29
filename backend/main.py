@@ -120,6 +120,7 @@ class ItemResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 class QuantityUpdate(BaseModel):
+    name: str
     quantity: int
 
 #endpoints (/ or /user/1 or /api/things)
@@ -161,17 +162,16 @@ async def delete_inventory_item(item: ItemCreate, db:SessionDep):
     return {"message": "Item was deleted from inventory!"}
 
 #partially update on a resource, PATCH requests only updates the specific fields provided by client
-@app.patch("/inventory/{item_id}remove")
-async def remove_quantity(item_id: int, update: QuantityUpdate, db:SessionDep):
-    itemExists = db.query(ItemDB).filter(ItemDB.id == item_id).first()
+@app.patch("/inventory/update")
+async def remove_quantity(update: QuantityUpdate, db:SessionDep):
+    itemExists = db.query(ItemDB).filter(ItemDB.name == update.name).first()
 
     if not itemExists:
-        raise HTTPException(status_code = 400, detail = f"{item_id} does not exist!")
+        raise HTTPException(status_code = 400, detail = f"{update.name} does not exist!")
     if update.quantity > itemExists.quantity:  # type: ignore[operator]
-        raise HTTPException(status_code= 400 , detail = f"{item_id} cannot your max number of items!")
+        raise HTTPException(status_code= 400 , detail = f"{update.name} cannot your pass your max number of items!")
 
-    #bug
-    itemExists -= update.quantity
+    itemExists.quantity -= update.quantity #ignore red line
     db.commit()
     db.refresh(itemExists)
     return itemExists

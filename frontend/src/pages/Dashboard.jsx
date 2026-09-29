@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import StatCard from "../components/StatCard";
 import MyInventoryDash from "../components/MyInventoryDash";
+import { useInventory } from "../components/InventoryContext";
 
 export default function Dashboard() {
   const [message, setMessage] = useState("");
+  const {inventory, handleGetAllInventory} = useInventory();
 
   useEffect(() => {
     fetch("http://localhost:8000/api/hello")
@@ -12,9 +14,13 @@ export default function Dashboard() {
       .catch((err) => console.error(err));
   }, []);
 
-  return (
+  useEffect(() => {
+    handleGetAllInventory();
+  }, []);
+
+ return (
     <>
-      <div>
+      <div >
         <h2 className="text-2xl font-semibold text-gray-900">Good afternoon!</h2>
         <p className="text-gray-500 mt-1">
           Here's what's happening with your inventory.
@@ -22,7 +28,7 @@ export default function Dashboard() {
       </div>
 
       <div className="flex gap-4">
-        <StatCard label="Items" value="12" to="/stock" />
+        <StatCard label="Items" value={inventory.length} to="/stock" />
         <StatCard label="Low Stock" value="3" to="/stock" />
         <StatCard label="Top Stores" value="5" to="/stores" />
       </div>

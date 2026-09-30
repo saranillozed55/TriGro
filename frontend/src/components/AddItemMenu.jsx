@@ -20,7 +20,7 @@ export default function AddItemMenu({onItemAdded, onClosePerformed}) {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({name: itemName, quantity: itemQuantity}),
+                body: JSON.stringify({name: itemName, quantity: itemQuantity, expiration_date: itemExpirationDate}),
             });
 
             const data = await response.json();
@@ -39,6 +39,8 @@ export default function AddItemMenu({onItemAdded, onClosePerformed}) {
 
         setItemQuantity(cleanValue);
     }
+
+
 
     //later on add a popup that shows if the item was added or not
 

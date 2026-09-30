@@ -17,6 +17,7 @@ from typing import Annotated
 
 from database import SessionLocal, Base, engine
 from models import User, ItemDB
+from datetime import date
 
 
 app = FastAPI(
@@ -111,11 +112,13 @@ if __name__ == "__main__":
 class ItemCreate(BaseModel):
     name: str
     quantity: int
+    expiration_date: date | None = None # allows python 'date' or None
 
 class ItemResponse(BaseModel):
     id: int
     name: str
     quantity: int
+    expiration_date: date | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -175,6 +178,7 @@ async def remove_quantity(update: QuantityUpdate, db:SessionDep):
     db.commit()
     db.refresh(itemExists)
     return itemExists
+
 
 
 #clear entire inventory

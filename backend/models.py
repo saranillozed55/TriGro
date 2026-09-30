@@ -1,5 +1,5 @@
 from database import Base
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Date, ForeignKey, DateTime,func
 
 
 class Student(Base):
@@ -22,3 +22,12 @@ class ItemDB(Base):
     id = Column(Integer, primary_key=True, index = True)
     quantity = Column(Integer, nullable=False)
     name = Column(String, nullable = False)
+    expiration_date = Column(Date, nullable = True)
+
+class TransactionsDB(Base):
+    __tablename__ = "transactions"
+
+    id = Column(Integer, primary_key=True, index = True)
+    item_id = Column(Integer, ForeignKey("items.id"), nullable=False) # ForeignKey - define a link between a column in one table and a column in another
+    change = Column(Integer, nullable = False)
+    created_at = Column(DateTime, server_default=func.now()) #configures the database column to automatically populate with the current database tiemstamp upon row insertion

@@ -6,10 +6,12 @@ import { RiSubtractFill } from "react-icons/ri";
 import { GoPlus } from "react-icons/go";
 import { FaRegTrashCan } from "react-icons/fa6";
 import { IoFilterOutline } from "react-icons/io5";
+import { BiPencil } from "react-icons/bi";
 
 export default function Stock() {
   const {inventory, handleGetAllInventory} = useInventory();
   const[search, setSearch] = useState('')
+  const [today, setToday] = useState(new Date());
   
   //creates acopy of inventory array
   const filteredData = [...inventory].sort((a,b) => {
@@ -58,8 +60,37 @@ export default function Stock() {
     }
   }
 
+  useEffect(() => {
+    // Update the date every minute to check if the day rolled over
+    const interval = setInterval(() => {
+      setToday(new Date());
+    }, 60000); 
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const calculateExpiration = (curDate,expDate) => {
+      if(!expDate) return null;
+
+      const start = new Date(curDate);
+      const end = new Date(expDate);
+
+      // set both times to midnight
+      start.setHours(0,0,0,0);
+      end.setHours(0,0,0,0);
+
+      //calculate the difference in milliseconds
+      const diffInMs = end - start;
+
+      // convert milliseconds to days
+
+      const daysLeft = Math.floor(diffInMs/(1000 * 60 * 60 * 24));
+      return daysLeft
+  };
 
   //TODO: Make cards for this page instead of plain text
+  //TODO: Move the logic outside of just stock 
+  //TODO: Still need to make them into cards rather than just text
   return( 
     <>
       {showRemoveItemMenu && (<RemoveItemMenu onItemRemoved={handleGetAllInventory} onClosePerformed={() => setShowRemoveItemMenu(false)}/>)}
@@ -89,9 +120,10 @@ export default function Stock() {
         <div className="space-y-3">
           {filteredData.map((item) => (
               <div key={item.id} className="flex items-end">
-                <span className="flex items-center gap-2">
+                <span className="flex items-center gap-2 pr-1">
                   <span>{item.name}</span>
                 </span>
+                {item.expiration_date && (<em className ="text-sm">(Exp: {calculateExpiration(today,item.expiration_date)} days)</em>)}
                 <span className="flex-1 border-b border-dotted border-gray-300 mx-2 mb-1"></span>
                 <div className="flex flex-row gap-1">
                   <span className="font-medium">{item.quantity}</span>

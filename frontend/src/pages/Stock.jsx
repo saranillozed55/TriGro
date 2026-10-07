@@ -112,6 +112,9 @@ export default function Stock() {
             <div className = "bg-gray-300 w-fit rounded p-2">
                 <button className = "cursor-pointer" onClick={handleUpdateItems}>^ Update Item</button> 
             </div>
+            <div className = "bg-gray-300 w-fit rounded p-2">
+                <button className = "cursor-pointer">Transaction History</button> 
+            </div>
 
             <button className="ml-auto cursor-pointer"><IoFilterOutline/></button>
 

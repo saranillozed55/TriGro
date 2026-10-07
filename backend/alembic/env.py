@@ -4,7 +4,7 @@ from logging.config import fileConfig
 from alembic import context
 from database import Base
 from dotenv import load_dotenv
-from models import *
+import models
 from sqlalchemy import engine_from_config, pool
 
 # this is the Alembic Config object, which provides
@@ -12,18 +12,14 @@ from sqlalchemy import engine_from_config, pool
 load_dotenv()
 config = context.config
 db_url = os.getenv("DATABASE_URL")
-if db_url is None:
-    raise RuntimeError("DATABASE_URL not set in .env")
+if not db_url:
+    raise RuntimeError("DATABASE_URL must be set in the environment or backend/.env")
 config.set_main_option("sqlalchemy.url", db_url)
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
 target_metadata = Base.metadata
 
 

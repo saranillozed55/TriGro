@@ -61,8 +61,6 @@ def get_recipes(ingredients:str):
 app.include_router(router)
 
 #--------------------------------------------------------------------------
-#Database Model - Essentially a row in a table
-Base.metadata.create_all(bind=engine)
 
 #Pydantic Models(Data class) - What I Accept - the information the client is allowed to provide
 class UserCreate(BaseModel): 

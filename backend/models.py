@@ -1,12 +1,5 @@
 from database import Base
-from sqlalchemy import Column, Integer, String, Date, ForeignKey, DateTime,func
-
-
-class Student(Base):
-    __tablename__ = 'student'
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
-    age = Column(Integer)
+from sqlalchemy import Column, Integer, String, Date, ForeignKey, DateTime, func
 
 class User(Base):
     __tablename__ = "users"

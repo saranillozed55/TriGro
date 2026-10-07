@@ -2,16 +2,16 @@ import {useState} from "react"
 
 export default function AddItemMenu({onItemAdded, onClosePerformed}) {
 
-    //TODO: send the item/create the item here to backend
-
     const[itemName, setItemName] = useState('');
     const[itemQuantity, setItemQuantity] = useState(1);
     const[itemExpirationDate, setItemExpirationDate] = useState('');
+    const[submitError, setSubmitError] = useState('');
     const isInputEmpty = itemName.trim() === '' || itemQuantity === 0;
 
     const handleItemSubmit = async (event) => {
 
         event.preventDefault();
+        setSubmitError('');
 
         try {
             //send post request
@@ -20,16 +20,23 @@ export default function AddItemMenu({onItemAdded, onClosePerformed}) {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({name: itemName, quantity: itemQuantity, expiration_date: itemExpirationDate}),
+                body: JSON.stringify({name: itemName, quantity: itemQuantity, expiration_date: itemExpirationDate || null}),
             });
 
             const data = await response.json();
+            if (!response.ok) {
+                const detail = Array.isArray(data.detail)
+                    ? data.detail.map(({loc, msg}) => `${loc.join('.')}: ${msg}`).join('; ')
+                    : data.detail;
+                throw new Error(detail || `Request failed with status ${response.status}`);
+            }
             console.log(data.name, "was added to database.");
 
             onItemAdded();
 
         } catch (error) {
             console.error("Failed to add item:", error);
+            setSubmitError(error instanceof Error ? error.message : "Failed to add item.");
         }
     }
     const handleItemQuantity = async (event) => {
@@ -75,6 +82,7 @@ export default function AddItemMenu({onItemAdded, onClosePerformed}) {
                         ></input>
                     </div>
                 </div>
+                {submitError && <p className="text-red-600" role="alert">{submitError}</p>}
                 <button className ="cursor-pointer" type="submit" disabled ={isInputEmpty}>
                     Submit
                 </button>

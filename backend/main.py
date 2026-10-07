@@ -129,6 +129,7 @@ class QuantityUpdate(BaseModel):
 def root():
     return {"message": "Backend running"}
 
+#------------------------------------------------------------------
 #Region: Stock
 @app.post("/inventory/", response_model=ItemResponse)
 async def create_inventory_item(item: ItemCreate, db:SessionDep):

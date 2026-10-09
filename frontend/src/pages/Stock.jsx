@@ -51,7 +51,7 @@ export default function Stock() {
       }
 
       const data = await response.json;
-      console.log(data.name, "was incremented to database.");
+      console.log(data.name, "was updated in database.");
 
       await handleGetAllInventory();
     }
@@ -85,6 +85,9 @@ export default function Stock() {
       // convert milliseconds to days
 
       const daysLeft = Math.floor(diffInMs/(1000 * 60 * 60 * 24));
+
+
+
       return daysLeft
   };
 
@@ -121,13 +124,23 @@ export default function Stock() {
         
         </div>
         <div className="space-y-3">
-          {filteredData.map((item) => (
-              <div key={item.id} className="flex items-end">
-                <span className="flex items-center gap-2 pr-1">
-                  <span>{item.name}</span>
-                </span>
-                {item.expiration_date && (<em className ="text-sm">(Exp: {calculateExpiration(today,item.expiration_date)} days)</em>)}
+          {filteredData.map((item) => {
+              const expirationDaysLeft = calculateExpiration(today, item.expiration_date);
+              return (
+                <div key={item.id} className="flex items-end">
+                  <span className="flex items-center gap-2 pr-1">
+                    <span>{item.name}</span>
+                  </span>
+          
+                {item.expiration_date && 
+                (<em className ="text-sm">
+                (Exp: 
+                {expirationDaysLeft <= 0 ? <span className="text-red-600"> Expired</span> : <span> {expirationDaysLeft} days</span>})
+                </em>)
+                }
+
                 <span className="flex-1 border-b border-dotted border-gray-300 mx-2 mb-1"></span>
+
                 <div className="flex flex-row gap-1">
                   <span className="font-medium">{item.quantity}</span>
                   {updateItems && (<button className="text-xl text-green-600 cursor-pointer" onClick={(e) =>
@@ -138,7 +151,7 @@ export default function Stock() {
                   ><RiSubtractFill/></button>)}
                 </div>
               </div>
-            ))}
+            )})}
         </div>
 
       </div>

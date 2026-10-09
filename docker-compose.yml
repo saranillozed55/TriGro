@@ -15,6 +15,16 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-
+    
+  api:
+    build: ./backend
+    container_name: trigro-api
+    environment:
+      DATABASE_URL: postgresql+psycopg2://postgres:${POSTGRES_PASSWORD:-CHANGE_ME}@db:5432/trigro
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
 volumes:
   pgdata:

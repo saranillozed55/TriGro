@@ -10,13 +10,13 @@ from fastapi import Depends, FastAPI, HTTPException, status, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from pydantic import BaseModel, ConfigDict
-from sqlalchemy import Column, Integer, String, create_engine, delete, select
+from sqlalchemy import Column, Integer, String, create_engine, delete, select, DateTime, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session, sessionmaker
 from typing import Annotated
 
 from database import SessionLocal, Base, engine
-from models import User, ItemDB
+from models import User, ItemDB, TransactionsDB
 from datetime import date
 
 
@@ -138,6 +138,7 @@ async def create_inventory_item(item: ItemCreate, db:SessionDep):
         setattr(existing, "quantity", existing.quantity + item.quantity)
         db.commit()
         db.refresh(existing)
+        #TODO: This should just tell the client that the item was updated or is already in the inventory
         return existing
 
     #'**' takes that dictionary and unpacks it into keyword arguments(Ex: name = "Apple")
@@ -159,21 +160,30 @@ async def delete_inventory_item(item: ItemCreate, db:SessionDep):
             status_code = 400,
             detail = f"{item} is not in your inventory!"
         )
-    db.delete(itemExists)
+
+    itemExists.deleted = True # type: ignore
+    itemExists.deleted_at = func.now() # type: ignore
     db.commit()
-    return {"message": "Item was deleted from inventory!"}
+    return {"message": "Item was (soft)deleted from inventory!"}
 
 #partially update on a resource, PATCH requests only updates the specific fields provided by client
 @app.patch("/inventory/update")
-async def remove_quantity(update: QuantityUpdate, db:SessionDep):
-    itemExists = db.query(ItemDB).filter(ItemDB.name == update.name).first()
+async def change_quantity(itemName: QuantityUpdate, db:SessionDep):
+    itemExists = db.query(ItemDB).filter(ItemDB.name == itemName.name).first()
 
     if not itemExists:
-        raise HTTPException(status_code = 400, detail = f"{update.name} does not exist!")
-    if update.quantity > itemExists.quantity:  # type: ignore[operator]
-        raise HTTPException(status_code= 400 , detail = f"{update.name} cannot your pass your max number of items!")
+        raise HTTPException(status_code = 400, detail = f"{itemName.name} does not exist!")
+    if itemName.quantity > itemExists.quantity:  # type: ignore[operator]
+        raise HTTPException(status_code= 400 , detail = f"{itemName.name} cannot your pass your max number of items!")
 
-    itemExists.quantity -= update.quantity #ignore red line
+    itemExists.quantity -= itemName.quantity #ignore red line
+    itemExists.quantity = max(0, itemExists.quantity)  # Ensure quantity doesn't go below 0
+
+    db.add(TransactionsDB(
+        item_id=itemExists.id,
+        change=-itemName.quantity
+    ))
+
     db.commit()
     db.refresh(itemExists)
     return itemExists
@@ -201,7 +211,7 @@ async def get_all_inventory(db:SessionDep):
     # query all items using modern SQLAclhemy 
     statement = select(ItemDB)
 
-    db_items = db.scalars(statement).all()
+    db_items = db.scalars(statement.where(ItemDB.deleted == False)).all()
 
     #return raw database ORM Objects
     return db_items
